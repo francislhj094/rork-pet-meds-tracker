@@ -6,7 +6,8 @@ export async function scheduleMedicationNotification(
   medicationName: string,
   petName: string,
   nextDueDate: string,
-  reminderTime: string = '08:00'
+  reminderTime: string = '08:00',
+  dosage?: string
 ): Promise<string | null> {
   if (Platform.OS === 'web') {
     console.log('Notifications not supported on web');
@@ -17,26 +18,32 @@ export async function scheduleMedicationNotification(
     const [hours, minutes] = reminderTime.split(':').map(Number);
     const dueDate = new Date(nextDueDate);
     dueDate.setHours(hours, minutes, 0, 0);
+    
+    const notificationTime = new Date(dueDate.getTime() - 15 * 60 * 1000);
 
-    if (dueDate.getTime() <= Date.now()) {
+    if (notificationTime.getTime() <= Date.now()) {
       console.log('Scheduled time is in the past, skipping notification');
       return null;
     }
 
+    const bodyText = dosage 
+      ? `${medicationName} (${dosage}) is due in 15 minutes`
+      : `${medicationName} is due in 15 minutes`;
+
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: `Time for ${petName}'s medication`,
-        body: `${medicationName} is due today`,
+        title: `${petName}'s medication reminder`,
+        body: bodyText,
         data: { medicationId },
         sound: true,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: dueDate,
+        date: notificationTime,
       },
     });
 
-    console.log(`Scheduled notification ${notificationId} for ${medicationName}`);
+    console.log(`Scheduled notification ${notificationId} for ${medicationName} at ${notificationTime.toISOString()}`);
     return notificationId;
   } catch (error) {
     console.error('Error scheduling notification:', error);
@@ -63,6 +70,8 @@ export async function scheduleAllMedicationNotifications(
     petId: string;
     name: string;
     nextDue: string;
+    reminderTime?: string;
+    dosage?: string;
   }[],
   pets: {
     id: string;
@@ -83,7 +92,9 @@ export async function scheduleAllMedicationNotifications(
           med.id,
           med.name,
           pet.name,
-          med.nextDue
+          med.nextDue,
+          med.reminderTime,
+          med.dosage
         );
       }
     }

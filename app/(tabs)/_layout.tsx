@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, Heart } from "lucide-react-native";
+import { Home, Heart, Calendar, Settings } from "lucide-react-native";
 import React from "react";
 
 export default function TabLayout() {
@@ -34,6 +34,20 @@ export default function TabLayout() {
         options={{
           title: "My Pets",
           tabBarIcon: ({ color }) => <Heart size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ color }) => <Calendar size={24} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color }) => <Settings size={24} color={color} />,
         }}
       />
     </Tabs>

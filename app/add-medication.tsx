@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { usePetMeds } from '@/providers/PetMedsProvider';
 import { Medication, ScheduleType } from '@/types';
-import { ChevronDown } from 'lucide-react-native';
+import { ChevronDown, ScanLine } from 'lucide-react-native';
 
 const SCHEDULES: ScheduleType[] = ['Daily', 'Weekly', 'Monthly', 'Every 3 Months', 'Every 6 Months', 'Yearly'];
 
@@ -72,6 +72,14 @@ export default function AddMedicationScreen() {
         )}
 
         <View style={styles.form}>
+          <TouchableOpacity
+            style={styles.scanButton}
+            onPress={() => router.push(`/scan-barcode?petId=${petId}`)}
+          >
+            <ScanLine size={20} color="#FF6B6B" />
+            <Text style={styles.scanButtonText}>Scan Barcode</Text>
+          </TouchableOpacity>
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Medication Name *</Text>
             <TextInput
@@ -272,5 +280,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#FFFFFF',
+  },
+  scanButton: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#FF6B6B',
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  scanButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FF6B6B',
   },
 });

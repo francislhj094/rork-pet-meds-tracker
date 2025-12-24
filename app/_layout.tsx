@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PetMedsProvider } from "@/providers/PetMedsProvider";
 import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,8 +22,30 @@ Notifications.setNotificationHandler({
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const [isReady, setIsReady] = useState(false);
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      const hasSeenOnboarding = await AsyncStorage.getItem('hasSeenOnboarding');
+      setIsReady(true);
+      
+      if (!hasSeenOnboarding && segments[0] !== 'onboarding') {
+        router.replace('/onboarding');
+      }
+    };
+    
+    checkOnboarding();
+  }, [router, segments]);
+
+  if (!isReady) {
+    return null;
+  }
+
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen 
         name="add-pet" 
@@ -42,6 +65,25 @@ function RootLayoutNav() {
         name="pet/[id]" 
         options={{ 
           title: "Pet Details"
+        }} 
+      />
+      <Stack.Screen 
+        name="medication/[id]" 
+        options={{ 
+          title: "Medication Details"
+        }} 
+      />
+      <Stack.Screen 
+        name="history" 
+        options={{ 
+          title: "History"
+        }} 
+      />
+      <Stack.Screen 
+        name="scan-barcode" 
+        options={{ 
+          title: "Scan Barcode",
+          presentation: "modal"
         }} 
       />
     </Stack>
